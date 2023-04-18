@@ -17,11 +17,15 @@ function getAllUsers(req, res) {
 function getUserById(req, res) {
   User.findById(req.params.userId)
     .then((user) => {
+      if (!user) {
+        res.status(notFoundError).send({ message: 'Пользователь по указанному id не найден' });
+        return;
+      }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(notFoundError).send({ message: 'Пользователь по указанному id не найден' });
+        res.status(incorrectDataError).send({ message: 'Пользователь по указанному id не найден' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });

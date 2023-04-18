@@ -33,11 +33,15 @@ function createCard(req, res) {
 function deleteCard(req, res) {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
+      if (!card) {
+        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        return;
+      }
       res.send(card);
     })
     .catch((err) => {
       if (err.name = 'CastError') {
-        res.status(notFoundError).send({ message: 'Карточка с указанным id не найдена' });
+        res.status(incorrectDataError).send({ message: 'Передан несуществующий _id карточки' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
@@ -51,6 +55,10 @@ function likeCard(req, res) {
     { new: true }
   ).populate('likes')
     .then((card) => {
+      if (!card) {
+        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        return;
+      }
       res.send(card);
     })
     .catch((err) => {
@@ -58,7 +66,7 @@ function likeCard(req, res) {
         res.status(incorrectDataError).send({ message: 'Переданы некорректные данные для постановки лайка' });
         return;
       } else if (err.path === '_id') {
-        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        res.status(incorrectDataError).send({ message: 'Передан несуществующий _id карточки' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
@@ -72,6 +80,10 @@ function unlikeCard(req, res) {
     { new: true }
   )
     .then((card) => {
+      if (!card) {
+        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        return;
+      }
       res.send(card);
     })
     .catch((err) => {
@@ -79,7 +91,7 @@ function unlikeCard(req, res) {
         res.status(incorrectDataError).send({ message: 'Переданы некорректные данные для снятия лайка' });
         return;
       } else if (err.path === '_id') {
-        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        res.status(incorrectDataError).send({ message: 'Передан несуществующий _id карточки' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
