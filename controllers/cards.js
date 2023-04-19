@@ -11,7 +11,7 @@ function getAllCards(req, res) {
     })
     .catch(() => {
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function createCard(req, res) {
@@ -27,75 +27,69 @@ function createCard(req, res) {
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function deleteCard(req, res) {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        res.status(notFoundError).send({ message: 'Передан несуществующий id карточки' });
         return;
       }
       res.send(card);
     })
     .catch((err) => {
-      if (err.name = 'CastError') {
-        res.status(incorrectDataError).send({ message: 'Передан несуществующий _id карточки' });
+      if (err.name === 'CastError') {
+        res.status(incorrectDataError).send({ message: 'Передан некорректный id карточки' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function likeCard(req, res) {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   ).populate('likes')
     .then((card) => {
       if (!card) {
-        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        res.status(notFoundError).send({ message: 'Передан несуществующий id карточки' });
         return;
       }
       res.send(card);
     })
     .catch((err) => {
-      if (err.path === 'likes') {
+      if (err.name === 'CastError') {
         res.status(incorrectDataError).send({ message: 'Переданы некорректные данные для постановки лайка' });
-        return;
-      } else if (err.path === '_id') {
-        res.status(incorrectDataError).send({ message: 'Передан несуществующий _id карточки' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function unlikeCard(req, res) {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .then((card) => {
       if (!card) {
-        res.status(notFoundError).send({ message: 'Передан несуществующий _id карточки' });
+        res.status(notFoundError).send({ message: 'Передан несуществующий id карточки' });
         return;
       }
       res.send(card);
     })
     .catch((err) => {
-      if (err.path === 'likes') {
+      if (err.name === 'CastError') {
         res.status(incorrectDataError).send({ message: 'Переданы некорректные данные для снятия лайка' });
-        return;
-      } else if (err.path === '_id') {
-        res.status(incorrectDataError).send({ message: 'Передан несуществующий _id карточки' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 module.exports = {
@@ -103,5 +97,5 @@ module.exports = {
   createCard,
   deleteCard,
   likeCard,
-  unlikeCard
-}
+  unlikeCard,
+};

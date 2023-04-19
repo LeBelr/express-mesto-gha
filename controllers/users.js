@@ -11,25 +11,25 @@ function getAllUsers(req, res) {
     })
     .catch(() => {
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function getUserById(req, res) {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res.status(notFoundError).send({ message: 'Пользователь по указанному id не найден' });
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
         return;
       }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(incorrectDataError).send({ message: 'Пользователь по указанному id не найден' });
+        res.status(incorrectDataError).send({ message: 'Передан некорректный id пользователя' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function createUser(req, res) {
@@ -41,11 +41,11 @@ function createUser(req, res) {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(incorrectDataError).send({ message: 'Переданы некорректные данные при создании пользователя' })
+        res.status(incorrectDataError).send({ message: 'Переданы некорректные данные при создании пользователя' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function changeProfile(req, res) {
@@ -53,22 +53,26 @@ function changeProfile(req, res) {
 
   User.findByIdAndUpdate(
     req.user._id,
-    { name: name, about: about },
-    { new: true, runValidators: true }
+    { name, about },
+    { new: true, runValidators: true },
   )
     .then((user) => {
+      if (!user) {
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
+        return;
+      }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(incorrectDataError).send({ message: 'Переданы некорректные данные при обновлении профиля' })
+        res.status(incorrectDataError).send({ message: 'Переданы некорректные данные при обновлении профиля' });
         return;
-      } else if (err.name === 'CastError') {
-        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' })
+      } if (err.name === 'CastError') {
+        res.status(incorrectDataError).send({ message: 'Передан некорректный id пользователя' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 function changeAvatar(req, res) {
@@ -76,22 +80,26 @@ function changeAvatar(req, res) {
 
   User.findByIdAndUpdate(
     req.user._id,
-    { avatar: avatar },
-    { new: true, runValidators: true }
+    { avatar },
+    { new: true, runValidators: true },
   )
     .then((user) => {
+      if (!user) {
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
+        return;
+      }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(incorrectDataError).send({ message: 'Переданы некорректные данные при обновлении аватара' })
+        res.status(incorrectDataError).send({ message: 'Переданы некорректные данные при обновлении аватара' });
         return;
-      } else if (err.name === 'CastError') {
-        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' })
+      } if (err.name === 'CastError') {
+        res.status(incorrectDataError).send({ message: 'Передан некорректный id пользователя' });
         return;
       }
       res.status(serverError).send({ message: 'На сервере произошла ошибка' });
-    })
+    });
 }
 
 module.exports = {
@@ -99,6 +107,5 @@ module.exports = {
   getUserById,
   createUser,
   changeProfile,
-  changeAvatar
-}
-
+  changeAvatar,
+};
