@@ -1,5 +1,6 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-error');
+const UnauthorizedError = require('../errors/unauthorized-error');
 
 function getAllCards(req, res, next) {
   Card.find({}).populate('owner')
@@ -25,9 +26,14 @@ function deleteCard(req, res, next) {
       if (!card) {
         throw new NotFoundError('Передан несуществующий id карточки');
       }
-      if (JSON.stringify(card.owner) === `"${req.user._id}"`) {
-        Card.findByIdAndRemove(card._id);
-        res.send(card);
+      if (card.owner.toString() !== req.user._id) {
+        throw new UnauthorizedError('Нельзя удалять чужие карточки');
+      }
+      if (card.owner.toString() === req.user._id) {
+        Card.findByIdAndRemove(card._id)
+          .then((c) => {
+            res.send({ message: `Карточка ${c._id} удалена` });
+          });
       }
     })
     .catch(next);
