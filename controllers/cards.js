@@ -15,7 +15,7 @@ function createCard(req, res, next) {
 
   Card.create({ name, link, owner: req.user._id })
     .then((newCard) => {
-      res.send(newCard);
+      res.status(201).send(newCard);
     })
     .catch(next);
 }
@@ -29,12 +29,10 @@ function deleteCard(req, res, next) {
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Нельзя удалять чужие карточки');
       }
-      if (card.owner.toString() === req.user._id) {
-        Card.findByIdAndRemove(card._id)
-          .then((c) => {
-            res.send({ message: `Карточка ${c._id} удалена` });
-          });
-      }
+      return Card.deleteOne(card)
+        .then(() => {
+          res.send({ message: `Карточка ${card._id} удалена` });
+        });
     })
     .catch(next);
 }
